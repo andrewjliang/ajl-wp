@@ -34,8 +34,9 @@ keywords:
   - 3 to 6 keywords
   - can go here
 jelcodes:
-  - "C21"
-  - "C23"
+  - First JEL code here
+  - Second JEL code here
+  - and so forth
 bibliography: references.bib
 ---
 

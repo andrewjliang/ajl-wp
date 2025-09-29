@@ -291,11 +291,11 @@
     v(0.5em)
   }
   if jelcodes != none {
-    v(0.05em) // should match `inset` of abstract block
-    box(text(weight: 700, font: heading-family)[#skew(ax: -15deg)[JEL Codes:]])
+    v(0em) // reduced spacing for keywords
+    box(text(weight: 700, font: heading-family)[#skew(ax: -15deg)[JEL:]])
     h(1em)
     jelcodes.join(" " + sym.bullet + " ")
-    v(0.5em)
+    v(0em)
   }
 
   if toc {
@@ -390,7 +390,7 @@
 ],
   abstract-title: "Abstract",
   keywords: ([3 to 6 keywords], [can go here]),
-  jelcodes: ([C21], [C23]),
+  jelcodes: ([First JEL code here], [Second JEL code here], [and so forth]),
   font: ("Cochineal",),
   fontsize: 11pt,
   heading-family: ("Linux Biolinum", "Helvetica", "Arial",),
