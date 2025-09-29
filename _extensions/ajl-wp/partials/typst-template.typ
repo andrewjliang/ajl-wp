@@ -114,14 +114,14 @@
   }
   if keywords != none {
     v(-2em) // should match `inset` of abstract block
-    box(text(weight: 700, font: heading-family)[#skew(ax: -15deg)[Keywords]])
+    box(text(weight: 700, font: heading-family)[#skew(ax: 0deg)[Keywords]])
     h(1em)
     keywords.join(" " + sym.bullet + " ")
     v(0.5em)
   }
   if jelcodes != none {
     v(0em) // reduced spacing for keywords
-    box(text(weight: 700, font: heading-family)[#skew(ax: -15deg)[JEL:]])
+    box(text(weight: 700, font: heading-family)[#skew(ax: 0deg)[JEL]])
     h(1em)
     jelcodes.join(" " + sym.bullet + " ")
     v(0em)
