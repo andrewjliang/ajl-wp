@@ -1,0 +1,121 @@
+---
+title: Article Title
+abstract: |
+  The text of your abstract.
+  The `ajl-article` format is designed for scholarly articles, especially preprints.
+  Its goal is to be lightweight yet customizable, with thoughtful typography and layout.
+  The template is based off of Cory McCartan's `cmc-article` template, as well as Christopher Kenny's `ctk-article` template.
+author:
+  - name: Jane Doe
+    affiliations:
+      - name: An Organization
+        department: The Department
+        address: 1 Union St
+        city: Seattle
+        region: WA
+        postal-code: "98101 " # quotes and space handle N.E. ZIP codes with leading 0
+      - A second affilication
+    email: jdoe1@example.org
+    url: https://example.org/
+    corresponding: true
+  - name: John Doe
+    affiliations:
+      - Another Affiliation
+    email: jdoe2@example.org
+date: last-modified
+thanks: |
+  Acknowledgements here.
+format:
+  ajl-wp-typst:
+    keep-typ: true
+    journal:
+      blinded: false
+keywords:
+  - 3 to 6 keywords
+  - can go here
+jelcodes:
+  - "C21"
+  - "C23"
+bibliography: references.bib
+---
+
+<!-- Math macros for Typst -->
+{{< include _header.md >}}
+
+# Introduction {#sec-intro}
+
+Body of paper. Citations are easy to use [@metropolis1953].
+See @sec-addl for a math demonstration.
+
+# Additional section headings here {#sec-addl}
+
+`cmc-article` includes helpful math packages: `mathtools`, `amssymb`, `amsthm`, and `physics` by default.
+It also includes a default `header.tex` file with useful macros for math and statistics.
+Some of these are demonstrated in @eq-first.
+
+$$
+\begin{aligned}
+   \vb{X} &\sim \Norm(\vbg{\mu}, \vbg\Sigma^2); \quad
+    p(\vb x) = \frac{1}{\sqrt{(2\pi)^k\det(\vb*\Sigma)}}
+        \exp(-\frac{1}{2} (\vb x-\vbg\mu)^\top \vbg\Sigma^{-1} (\vb x-\vbg\mu)) \\
+    \E(Y) &= \sum_{y\in\mathcal{Y}} y\Pr(Y=y)
+    = \sum_{y\in\mathcal{Y}} y\E(\mathbb{1}\{Y=y\})
+\end{aligned}
+$$ {#eq-first}
+
+The package also includes an `assump` environment for typesetting assumptions which can be referenced by easy-to-remember abbreviations.
+
+\begin{assump}{IID}
+The observations $X_1,X_2,\dots,X_n$ are independent and identically distributed.
+\end{assump}
+
+\begin{assump}[Finite expectation]{FE}
+For each $1\le i\le n$, we have $\E[X_i]=\mu<\infty$.
+\end{assump}
+
+::: {#thm-wlln}
+##### Weak Law of Large Numbers
+
+Let $\bar X_n \coloneq n^{-1}\sum_{i=1}^n X_i$.
+Then under \ref{a-iid} and \ref{a-fe}, we have $\bar X_n\cvp\mu$ as $n\to\infty$.
+:::
+
+## An example subsection heading
+
+See @fig-ex for an example figure.
+
+```{r fig-ex}
+#| fig-cap: Histogram of samples from a gamma distribution.
+library(ggplot2)
+
+ggplot(NULL, aes(rgamma(5e4, 3))) +
+  geom_histogram(aes(y = after_stat(density))) +
+  scale_y_continuous(name=NULL, expand=expansion(c(0, 0.05))) +
+  labs(x=NULL) +
+  theme_bw(base_family="Times")
+```
+
+### Level 3 heading
+
+Testing that *italics* and **bold** text work.
+
+#### Level 4 (numbered paragraph) heading
+
+Text here.
+
+##### Level 5 (paragraph) heading
+
+Text here.
+
+# Conclusion
+
+The final section of the main text.
+
+# References {.unnumbered}
+
+::: {#refs}
+:::
+
+# Appendix section {.appendix}
+
+This section will be numbered like an appendix
