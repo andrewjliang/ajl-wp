@@ -119,6 +119,10 @@
     keywords.join(" " + sym.bullet + " ")
     v(0.5em)
   }
+  set document(
+    jelcodes: jelcodes.join(", ")
+  ) if jelcodes != none
+  
   if jelcodes != none {
     v(0em) // reduced spacing for keywords
     box(text(weight: 700, font: heading-family)[#skew(ax: 0deg)[JEL]])

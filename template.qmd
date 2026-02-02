@@ -7,6 +7,7 @@ abstract: |
   The template is based off of Cory McCartan's `cmc-article` template, as well as Christopher Kenny's `ctk-article` template.
 author:
   - name: Jane Doe
+    orcid: 0000-0002-1825-0097
     affiliations:
       - name: An Organization
         department: The Department

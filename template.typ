@@ -169,7 +169,25 @@
     )
 }
 
-
+#let orcid_svg = str(
+  "<?xml version=\"1.0\" encoding=\"utf-8\"?>
+  <!-- Generator: Adobe Illustrator 19.1.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+  <svg version=\"1.1\" id=\"Layer_1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" x=\"0px\" y=\"0px\"
+    viewBox=\"0 0 256 256\" style=\"enable-background:new 0 0 256 256;\" xml:space=\"preserve\">
+  <style type=\"text/css\">
+    .st0{fill:#A6CE39;}
+    .st1{fill:#FFFFFF;}
+  </style>
+  <path class=\"st0\" d=\"M256,128c0,70.7-57.3,128-128,128C57.3,256,0,198.7,0,128C0,57.3,57.3,0,128,0C198.7,0,256,57.3,256,128z\"/>
+  <g>
+    <path class=\"st1\" d=\"M86.3,186.2H70.9V79.1h15.4v48.4V186.2z\"/>
+    <path class=\"st1\" d=\"M108.9,79.1h41.6c39.6,0,57,28.3,57,53.6c0,27.5-21.5,53.6-56.8,53.6h-41.8V79.1z M124.3,172.4h24.5
+      c34.9,0,42.9-26.5,42.9-39.7c0-21.5-13.7-39.7-43.7-39.7h-23.7V172.4z\"/>
+    <path class=\"st1\" d=\"M88.7,56.8c0,5.5-4.5,10.1-10.1,10.1c-5.6,0-10.1-4.6-10.1-10.1c0-5.6,4.5-10.1,10.1-10.1
+      C84.2,46.7,88.7,51.3,88.7,56.8z\"/>
+  </g>
+  </svg>"
+)
 
 #let ajl-wp(
   title: none,
@@ -263,6 +281,11 @@
             #set text(hyphenate: false)
             #author.name \
             #author.affiliation
+            #if "orcid" in author and str(author.at("orcid")).len() > 0 [
+  #link("https://orcid.org/" + author.at("orcid"))[
+    #box(height: 9pt, image(bytes(orcid_svg)))
+  ]
+]
           ]
       )
     ))
@@ -290,13 +313,14 @@
     keywords.join(" " + sym.bullet + " ")
     v(0.5em)
   }
-  if jelcodes != none {
-    v(0em) // reduced spacing for keywords
-    box(text(weight: 700, font: heading-family)[#skew(ax: 0deg)[JEL]])
-    h(1em)
-    jelcodes.join(" " + sym.bullet + " ")
-    v(0em)
-  }
+  
+  if type(jelcodes) == array and jelcodes.len() > 0 [
+  #v(0em)
+  #box(text(weight: 700, font: heading-family)[#skew(ax: 0deg)[JEL]])
+  #h(1em)
+  #jelcodes.join(" " + sym.bullet + " ")
+  #v(0em)
+]
 
   if toc {
     let title = if toc_title == none {
@@ -342,7 +366,24 @@
   header: context if counter(page).get().first() > 1 {fakesc[
     Article Title
     #h(1fr)
-    September 28, 2025
+    February 2, 2026
+    ]},
+)
+
+#let fakesc(s, scaling: 0.75) = {
+  show regex("\p{Ll}+"): it => {
+    context text(scaling * 1em, stroke: 0.01em + text.fill, upper(it))
+  }
+  text(s)
+}
+#set page(
+  paper: "us-letter",
+  margin: (x: 1in,y: 1in,),
+  numbering: "1",
+  header: context if counter(page).get().first() > 1 {fakesc[
+    Article Title
+    #h(1fr)
+    February 2, 2026
     ]},
 )
 
@@ -354,12 +395,15 @@
 // - font options
 #show: doc => ajl-wp(
   title: [Article Title],
+
   authors: (
     (
       name: [*Jane Doe*#footnote(numbering: "*")[
         To whom correspondence should be addressed.
         Email: #link("mailto:jdoe1\@example.org".replace("\\", ""), raw("jdoe1\@example.org".replace("\\", ""))).
-        Website: #link("https:\/\/example.org/".replace("\\", ""), raw("https:\/\/example.org/".replace("\\", ""))).
+                #let oid = "0000-0002-1825-0097"
+        ORCID: #link("https://orcid.org/" + oid)[#raw("https://orcid.org/" + oid)]
+                Website: #link("https:\/\/example.org/".replace("\\", ""), raw("https:\/\/example.org/".replace("\\", ""))).
         Address:
         1 Union St, Seattle, WA 98101.
         
@@ -384,7 +428,7 @@
   thanks: [Acknowledgements here.
 
 ],
-  date: [September 28, 2025],
+  date: [February 2, 2026],
   abstract: [The text of your abstract. The `ajl-article` format is designed for scholarly articles, especially preprints. Its goal is to be lightweight yet customizable, with thoughtful typography and layout. The template is based off of Cory McCartan's `cmc-article` template, as well as Christopher Kenny's `ctk-article` template.
 
 ],
