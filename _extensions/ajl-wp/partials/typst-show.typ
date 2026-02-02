@@ -26,7 +26,7 @@ $if(it.name.literal)$
         $if(it.email)$Email: #link("mailto:$it.email$".replace("\\", ""), raw("$it.email$".replace("\\", ""))).$endif$
         $if(it.orcid)$
         #let oid = "$it.orcid$"
-        ORCID: #link("https://orcid.org/" + oid)[#raw("https://orcid.org/" + oid)]
+        ORCID: #link("https://orcid.org/" + oid)[#raw("https://orcid.org/" + oid)].
         $endif$
         $if(it.url)$Website: #link("$it.url$".replace("\\", ""), raw("$it.url$".replace("\\", ""))).$endif$
         $for(it.affiliations/first)$$if(it.address)$Address:
