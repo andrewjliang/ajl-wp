@@ -402,7 +402,7 @@
         To whom correspondence should be addressed.
         Email: #link("mailto:jdoe1\@example.org".replace("\\", ""), raw("jdoe1\@example.org".replace("\\", ""))).
                 #let oid = "0000-0002-1825-0097"
-        ORCID: #link("https://orcid.org/" + oid)[#raw("https://orcid.org/" + oid)]
+        ORCID: #link("https://orcid.org/" + oid)[#raw("https://orcid.org/" + oid)].
                 Website: #link("https:\/\/example.org/".replace("\\", ""), raw("https:\/\/example.org/".replace("\\", ""))).
         Address:
         1 Union St, Seattle, WA 98101.
