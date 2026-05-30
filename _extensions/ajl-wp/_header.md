@@ -13,8 +13,8 @@
 \providecommand{\Norm}{\mathcal{N}\qty}
 \usepackage{amsmath}
 \usepackage{bm}
-\newcommand{\indep}{\!\perp\!\!\!\perp}
-\newcommand{\argmin}{\mathop{\text{arg~min}}\limits}
+\providecommand{\indep}{\!\perp\!\!\!\perp}
+\providecommand{\argmin}{\mathop{\text{arg~min}}\limits}
 \usepackage[mathscr]{euscript}
 \newtheorem{theorem}{Theorem}[section]
 \newtheorem{corollary}{Corollary}[theorem]

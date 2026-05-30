@@ -11,5 +11,13 @@
 \DeclareMathOperator{\Pr}{\mathbb{P}}
 \providecommand{\cvp}{\xrightarrow{\:p\,}}
 \providecommand{\Norm}{\mathcal{N}\qty}
-
+\usepackage{amsmath}
+\usepackage{bm}
+\providecommand{\indep}{\!\perp\!\!\!\perp}
+\providecommand{\argmin}{\mathop{\text{arg~min}}\limits}
+\usepackage[mathscr]{euscript}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{corollary}{Corollary}[theorem]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{assumption}[theorem]{Assumption}
 :::

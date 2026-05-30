@@ -1,0 +1,413 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\PassOptionsToPackage{dvipsnames,svgnames,x11names}{xcolor}
+% Above is same as <https://github.com/quarto-dev/quarto-cli/blob/main/src/resources/formats/pdf/pandoc/passoptions.latex>
+% Modified here to pass options to captions pacakge
+\PassOptionsToPackage{format=plain,
+  labelfont={bf,sf,small,singlespacing},
+  textfont={sf,small,singlespacing},
+  justification=justified,
+  margin=0.25in}{caption}%
+\documentclass[
+  11pt,
+]{article}
+\usepackage{xcolor}
+\usepackage[lmargin=1in,rmargin=1in,tmargin=1in,bmargin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\setcounter{secnumdepth}{4}
+% Modified from <https://github.com/quarto-dev/quarto-cli/blob/main/src/resources/formats/pdf/pandoc/fonts.latex>
+% to create additional font options
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+    \usepackage[p,osf,swashQ,scale=1.02]{cochineal}
+  \usepackage{amsthm}
+  \usepackage[cochineal,vvarbb]{newtxmath}
+      \usepackage{biolinum}
+    \usepackage[scale=0.95,varl]{inconsolata}
+\else % if luatex or xetex
+    \usepackage{unicode-math} % this also loads fontspec
+    \usepackage{mathpazo}
+  \usepackage{newpxtext}
+    \usepackage{biolinum}
+    \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% \usepackage{lmodern}
+
+\usepackage{sectsty}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+% Make \paragraph and \subparagraph free-standing
+\makeatletter
+\ifx\paragraph\undefined\else
+  \let\oldparagraph\paragraph
+  \renewcommand{\paragraph}{
+    \@ifstar
+      \xxxParagraphStar
+      \xxxParagraphNoStar
+  }
+  \newcommand{\xxxParagraphStar}[1]{\oldparagraph*{#1}\mbox{}}
+  \newcommand{\xxxParagraphNoStar}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+  \let\oldsubparagraph\subparagraph
+  \renewcommand{\subparagraph}{
+    \@ifstar
+      \xxxSubParagraphStar
+      \xxxSubParagraphNoStar
+  }
+  \newcommand{\xxxSubParagraphStar}[1]{\oldsubparagraph*{#1}\mbox{}}
+  \newcommand{\xxxSubParagraphNoStar}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+\makeatother
+
+
+\usepackage{longtable,booktabs,array}
+\newcounter{none} % for unnumbered tables
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx}
+\makeatletter
+\newsavebox\pandoc@box
+\newcommand*\pandocbounded[1]{% scales image to fit in text height/width
+  \sbox\pandoc@box{#1}%
+  \Gscale@div\@tempa{\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+  \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
+  \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi% select the smaller of both
+  \ifdim\@tempa\p@<\p@\scalebox{\@tempa}{\usebox\pandoc@box}%
+  \else\usebox{\pandoc@box}%
+  \fi%
+}
+% Set default figure placement to htbp
+\def\fps@figure{htbp}
+\makeatother
+
+
+% definitions for citeproc citations
+\NewDocumentCommand\citeproctext{}{}
+\NewDocumentCommand\citeproc{mm}{%
+  \begingroup\def\citeproctext{#2}\cite{#1}\endgroup}
+\makeatletter
+ % allow citations to break across lines
+ \let\@cite@ofmt\@firstofone
+ % avoid brackets around text for \cite:
+ \def\@biblabel#1{}
+ \def\@cite#1#2{{#1\if@tempswa , #2\fi}}
+\makeatother
+\newlength{\cslhangindent}
+\setlength{\cslhangindent}{1.5em}
+\newlength{\csllabelwidth}
+\setlength{\csllabelwidth}{3em}
+\newenvironment{CSLReferences}[2] % #1 hanging-indent, #2 entry-spacing
+ {\begin{list}{}{%
+  \setlength{\itemindent}{0pt}
+  \setlength{\leftmargin}{0pt}
+  \setlength{\parsep}{0pt}
+  % turn on hanging indent if param 1 is 1
+  \ifodd #1
+   \setlength{\leftmargin}{\cslhangindent}
+   \setlength{\itemindent}{-1\cslhangindent}
+  \fi
+  % set entry spacing
+  \setlength{\itemsep}{#2\baselineskip}}}
+ {\end{list}}
+\usepackage{calc}
+\newcommand{\CSLBlock}[1]{\hfill\break\parbox[t]{\linewidth}{\strut\ignorespaces#1\strut}}
+\newcommand{\CSLLeftMargin}[1]{\parbox[t]{\csllabelwidth}{\strut#1\strut}}
+\newcommand{\CSLRightInline}[1]{\parbox[t]{\linewidth - \csllabelwidth}{\strut#1\strut}}
+\newcommand{\CSLIndent}[1]{\hspace{\cslhangindent}#1}
+
+
+
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+
+
+ 
+
+
+\makeatletter
+\@ifpackageloaded{caption}{}{\usepackage{caption}}
+\AtBeginDocument{%
+\ifdefined\contentsname
+  \renewcommand*\contentsname{Table of contents}
+\else
+  \newcommand\contentsname{Table of contents}
+\fi
+\ifdefined\listfigurename
+  \renewcommand*\listfigurename{List of Figures}
+\else
+  \newcommand\listfigurename{List of Figures}
+\fi
+\ifdefined\listtablename
+  \renewcommand*\listtablename{List of Tables}
+\else
+  \newcommand\listtablename{List of Tables}
+\fi
+\ifdefined\figurename
+  \renewcommand*\figurename{Figure}
+\else
+  \newcommand\figurename{Figure}
+\fi
+\ifdefined\tablename
+  \renewcommand*\tablename{Table}
+\else
+  \newcommand\tablename{Table}
+\fi
+}
+\@ifpackageloaded{float}{}{\usepackage{float}}
+\floatstyle{ruled}
+\@ifundefined{c@chapter}{\newfloat{codelisting}{h}{lop}}{\newfloat{codelisting}{h}{lop}[chapter]}
+\floatname{codelisting}{Listing}
+\newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
+\usepackage{amsthm}
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+\theoremstyle{remark}
+\AtBeginDocument{\renewcommand*{\proofname}{Proof}}
+\newtheorem*{remark}{Remark}
+\newtheorem*{solution}{Solution}
+\newtheorem{refremark}{Remark}[section]
+\newtheorem{refsolution}{Solution}[section]
+\makeatother
+\makeatletter
+\makeatother
+\makeatletter
+\@ifpackageloaded{caption}{}{\usepackage{caption}}
+\@ifpackageloaded{subcaption}{}{\usepackage{subcaption}}
+\makeatother
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  pdftitle={Article Title},
+  pdfauthor={Jane Doe; John Doe},
+  pdfkeywords={3 to 6 keywords, can go here},
+  colorlinks=true,
+  linkcolor={blue},
+  filecolor={Maroon},
+  citecolor={Blue},
+  urlcolor={Blue},
+  pdfcreator={LaTeX via pandoc}}
+
+% NAMED ASSUMPTIONS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Use \begin{assump}[Optional label]{KEY} to create an assumption
+% Reference it with \ref{a-key}, where `key` is the lowercased version of `KEY`
+\makeatletter
+\newcommand{\assumplabel}[2]{%
+   \protected@write \@auxout {}{\string\newlabel{#1}{{#2}{\thepage}{#2}{#1}{}}}%
+   \hypertarget{#1}{#2}%
+}
+\makeatother
+\newenvironment{assump}[2][]{%
+\par\medskip\noindent%
+\def\tempa{}\def\tempb{#1}%
+\lowercase{\def\lblkey{asm-#2}}%
+\textbf{Assumption \assumplabel{\lblkey}{#2}}%
+\ifx\tempa\tempb\else~(#1)\fi%
+\textbf{.}\itshape%
+}{\medskip\normalfont}
+% short title
+\makeatletter
+\newcommand\@shorttitle{}
+\newcommand\shorttitle[1]{\renewcommand\@shorttitle{#1}}
+\usepackage{fancyhdr}
+\fancyhf{}
+\pagestyle{fancy}
+\renewcommand{\headrulewidth}{0pt}
+\fancyheadoffset{0pt}
+\lhead{\scshape \@shorttitle}
+\rhead{\scshape May 30, 2026}
+\cfoot{\thepage}
+\makeatother
+% abstract styling
+\renewenvironment{abstract}{
+  \centerline
+  {\large\sffamily\bfseries Abstract}\vspace{-0.25em}
+  \begin{quote}\small
+}{
+  \end{quote}
+}
+
+\title{\sffamily\bfseries\huge\parfillskip=0pt
+\rightskip=0pt plus .5\textwidth
+\leftskip=0pt plus .5\textwidth
+\emergencystretch=.3\textwidth Article Title}
+\shorttitle{Article Title}
+\author{\textbf{Jane Doe}\footnote{
+To whom correspondence should be addressed.
+Email: \texttt{\href{mailto:jdoe1@example.org}{jdoe1@example.org}}.
+Website: \url{https://example.org/}.
+ORCID: \texttt{\href{https://orcid.org/0000-0002-1825-0097}{0000-0002-1825-0097}}.
+Address:
+1 Union St, Seattle, WA 98101.
+Acknowledgements here.}
+\\The Department%
+\\An Organization%
+\vspace{2pt}
+%
+\\A second affilication%
+\vspace{2pt}
+ \and \textbf{John Doe}
+%
+\\Another Affiliation%
+\vspace{2pt}
+ }
+\date{May 30, 2026}
+\begin{document}
+\allsectionsfont{\sffamily}
+
+\maketitle
+
+\begin{abstract}
+The text of your abstract. The \texttt{ajl-article} format is designed
+for scholarly articles, especially preprints. Its goal is to be
+lightweight yet customizable, with thoughtful typography and layout. The
+template is based off of Cory McCartan's \texttt{cmc-article} template,
+as well as Christopher Kenny's \texttt{ctk-article} template.
+\end{abstract}
+
+\textbf{\textit{Keywords}}\quad 3 to 6 keywords~\textbullet~can go here
+
+\textbf{\textit{JEL Codes:}}\quad First JEL code here~\textbullet~Second
+JEL code here~\textbullet~and so forth
+
+
+\clearpage
+
+\section{Introduction}\label{sec-intro}
+
+Body of paper. Citations are easy to use (Metropolis et al. 1953). See
+Section~\ref{sec-addl} for a math demonstration.
+
+\section{Additional section headings here}\label{sec-addl}
+
+\texttt{cmc-article} includes helpful math packages: \texttt{mathtools},
+\texttt{amssymb}, \texttt{amsthm}, and \texttt{physics} by default. It
+also includes a default \texttt{header.tex} file with useful macros for
+math and statistics. Some of these are demonstrated in
+Eq.~\ref{eq-first}.
+
+\begin{equation}\protect\phantomsection\label{eq-first}{
+\begin{aligned}
+   \mathbf{X} &\sim \mathcal{N}(\boldsymbol{\mu}, \boldsymbol{\Sigma}^2); \quad
+    p(\mathbf{x}) = \frac{1}{\sqrt{(2\pi)^k\det(\mathbf{*}\Sigma)}}
+        \exp(-\frac{1}{2} (\mathbf{x}-\boldsymbol{\mu})^\top \boldsymbol{\Sigma}^{-1} (\mathbf{x}-\boldsymbol{\mu})) \\
+    \mathop{\mathrm{\mathbb{E}}}(Y) &= \sum_{y\in\mathcal{Y}} y\mathop{\mathrm{\mathbb{P}}}(Y=y)
+    = \sum_{y\in\mathcal{Y}} y\mathop{\mathrm{\mathbb{E}}}(\mathbb{1}\{Y=y\})
+\end{aligned}
+}\end{equation}
+
+The package also includes an \texttt{assump} environment for typesetting
+assumptions which can be referenced by easy-to-remember abbreviations.
+
+\begin{assump}{IID}
+The observations $X_1,X_2,\dots,X_n$ are independent and identically distributed.
+\end{assump}
+
+\begin{assump}[Finite expectation]{FE}
+For each $1\le i\le n$, we have $\mathop{\mathrm{\mathbb{E}}}[X_i]=\mu<\infty$.
+\end{assump}
+
+\begin{theorem}[Weak Law of Large
+Numbers]\protect\hypertarget{thm-wlln}{}\label{thm-wlln}
+
+Let \(\bar X_n \coloneq n^{-1}\sum_{i=1}^n X_i\). Then under \ref{a-iid}
+and \ref{a-fe}, we have \(\bar X_n\xrightarrow{\:p\,}\mu\) as
+\(n\to\infty\).
+
+\end{theorem}
+
+\subsection{An example subsection
+heading}\label{an-example-subsection-heading}
+
+See Figure~\ref{fig-ex} for an example figure.
+
+\begin{figure}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{template_files/figure-pdf/fig-ex-1.png}}
+
+}
+
+\caption{\label{fig-ex}Histogram of samples from a gamma distribution.}
+
+\end{figure}%
+
+\subsubsection{Level 3 heading}\label{level-3-heading}
+
+Testing that \emph{italics} and \textbf{bold} text work.
+
+\paragraph{Level 4 (numbered paragraph)
+heading}\label{level-4-numbered-paragraph-heading}
+
+Text here.
+
+\subparagraph{Level 5 (paragraph)
+heading}\label{level-5-paragraph-heading}
+
+Text here.
+
+\section{Conclusion}\label{conclusion}
+
+The final section of the main text.
+
+\section*{References}\label{references}
+\addcontentsline{toc}{section}{References}
+
+\protect\phantomsection\label{refs}
+\begin{CSLReferences}{1}{1}
+\bibitem[\citeproctext]{ref-metropolis1953}
+Metropolis, Nicholas, Arianna W Rosenbluth, Marshall N Rosenbluth,
+Augusta H Teller, and Edward Teller. 1953. {``Equation of State
+Calculations by Fast Computing Machines.''} \emph{The Journal of
+Chemical Physics} 21 (6): 1087--92.
+
+\end{CSLReferences}
+
+\appendix
+
+\renewcommand\thefigure{\thesection.\arabic{figure}}
+
+\setcounter{figure}{0}
+
+\section{Appendix section}\label{appendix-section}
+
+This section will be numbered like an appendix
+
+
+
+
+\end{document}

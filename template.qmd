@@ -27,10 +27,24 @@ date: last-modified
 thanks: |
   Acknowledgements here.
 format:
+  ajl-wp-pdf:
+    font-sans-biolinum: true
+    keep-tex: true
+    journal:
+      blinded: false
+    margin-top: 1in
+    margin-left: 1in
+    margin-right: 1in
+    margin-bottom: 1in
   ajl-wp-typst:
     keep-typ: true
     journal:
       blinded: false
+    margin-top: 1in
+    margin-left: 1in
+    margin-right: 1in
+    margin-bottom: 1in
+pdf-engine: pdflatex
 keywords:
   - 3 to 6 keywords
   - can go here

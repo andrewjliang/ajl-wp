@@ -1,0 +1,59 @@
+% short title
+\makeatletter
+\newcommand\@shorttitle{}
+\newcommand\shorttitle[1]{\renewcommand\@shorttitle{#1}}
+\usepackage{fancyhdr}
+\fancyhf{}
+\pagestyle{fancy}
+\renewcommand{\headrulewidth}{0pt}
+\fancyheadoffset{0pt}
+\lhead{\scshape \@shorttitle}
+\rhead{\scshape $date$}
+\cfoot{\thepage}
+\makeatother
+% abstract styling
+\renewenvironment{abstract}{
+  \centerline
+  {\large$if(font-headings-sans)$\sffamily$endif$\bfseries Abstract}\vspace{-0.25em}
+  \begin{quote}\small
+}{
+  \end{quote}
+}
+
+$if(title)$
+\title{$if(font-headings-sans)$\sffamily$endif$\bfseries\huge\parfillskip=0pt
+\rightskip=0pt plus .5\textwidth
+\leftskip=0pt plus .5\textwidth
+\emergencystretch=.3\textwidth $title$}
+\shorttitle{$title-meta$}
+$endif$
+$if(journal.blinded)$
+\author{\textbf{Anonymized Authors}}
+$else$
+\author{$for(by-author)$
+\textbf{$it.name.literal$}$if(it.attributes.corresponding)$\footnote{
+To whom correspondence should be addressed.
+$if(it.email)$
+Email: \texttt{\href{mailto:$it.email$}{$it.email$}}.
+$endif$
+$if(it.url)$
+Website: \url{$it.url$}.
+$endif$
+$if(it.orcid)$
+ORCID: \texttt{\href{https://orcid.org/$it.orcid$}{$it.orcid$}}.
+$endif$
+$for(it.affiliations/first)$
+$if(it.address)$
+Address:
+$it.address$, $it.city$, $if(it.region)$$it.region$$else$$it.country$$endif$ $it.postal-code$.
+$endif$
+$endfor$
+$if(thanks)$$thanks$$endif$}$endif$
+$for(it.affiliations)$
+$if(it.department)$\\$it.department$$endif$%
+$if(it.name)$\\$it.name$$endif$%
+\vspace{2pt}
+$endfor$ $sep$
+\and $endfor$}
+$endif$
+\date{$date$}

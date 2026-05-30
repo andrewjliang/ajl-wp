@@ -1,8 +1,38 @@
+// Simple numbering for non-book documents
+#let equation-numbering = "(1)"
+#let callout-numbering = "1"
+#let subfloat-numbering(n-super, subfloat-idx) = {
+  numbering("1a", n-super, subfloat-idx)
+}
+
+// Theorem configuration for theorion
+// Simple numbering for non-book documents (no heading inheritance)
+#let theorem-inherited-levels = 0
+
+// Theorem numbering format (can be overridden by extensions for appendix support)
+// This function returns the numbering pattern to use
+#let theorem-numbering(loc) = "1.1"
+
+// Default theorem render function
+#let theorem-render(prefix: none, title: "", full-title: auto, body) = {
+  if full-title != "" and full-title != auto and full-title != none {
+    strong[#full-title.]
+    h(0.5em)
+  }
+  body
+}
 // Some definitions presupposed by pandoc's typst output.
-#let blockquote(body) = [
-  #set text( size: 0.92em )
-  #block(inset: (left: 1.5em, top: 0.2em, bottom: 0.2em))[#body]
-]
+#let content-to-string(content) = {
+  if content.has("text") {
+    content.text
+  } else if content.has("children") {
+    content.children.map(content-to-string).join("")
+  } else if content.has("body") {
+    content-to-string(content.body)
+  } else if content == [ ] {
+    " "
+  }
+}
 
 #let horizontalrule = line(start: (25%,0%), end: (75%,0%))
 
@@ -10,14 +40,10 @@
   #stack(dir: ltr, spacing: 3pt, super[#num], contents)
 ]
 
-#show terms: it => {
-  it.children
-    .map(child => [
-      #strong[#child.term]
-      #block(inset: (left: 1.5em, top: -0.4em))[#child.description]
-      ])
-    .join()
-}
+#show terms.item: it => block(breakable: false)[
+  #text(weight: "bold")[#it.term]
+  #block(inset: (left: 1.5em, top: -0.4em))[#it.description]
+]
 
 // Some quarto-specific definitions.
 
@@ -29,15 +55,14 @@
   )
 
 #let block_with_new_content(old_block, new_content) = {
-  let d = (:)
   let fields = old_block.fields()
-  fields.remove("body")
+  let _ = fields.remove("body")
   if fields.at("below", default: none) != none {
     // TODO: this is a hack because below is a "synthesized element"
     // according to the experts in the typst discord...
     fields.below = fields.below.abs
   }
-  return block.with(..fields)(new_content)
+  block.with(..fields)(new_content)
 }
 
 #let empty(v) = {
@@ -69,7 +94,6 @@
   label: none,
   supplement: str,
   position: none,
-  subrefnumbering: "1a",
   subcapnumbering: "(a)",
   body,
 ) = {
@@ -82,16 +106,19 @@
       supplement: supplement,
       caption: caption,
       {
-        show figure.where(kind: kind): set figure(numbering: _ => numbering(subrefnumbering, n-super, quartosubfloatcounter.get().first() + 1))
+        show figure.where(kind: kind): set figure(numbering: _ => {
+          let subfloat-idx = quartosubfloatcounter.get().first() + 1
+          subfloat-numbering(n-super, subfloat-idx)
+        })
         show figure.where(kind: kind): set figure.caption(position: position)
 
         show figure: it => {
           let num = numbering(subcapnumbering, n-super, quartosubfloatcounter.get().first() + 1)
-          show figure.caption: it => {
+          show figure.caption: it => block({
             num.slice(2) // I don't understand why the numbering contains output that it really shouldn't, but this fixes it shrug?
             [ ]
             it.body
-          }
+          })
 
           quartosubfloatcounter.step()
           it
@@ -122,26 +149,36 @@
   // when we cleanup pandoc's emitted code to avoid spaces this will have to change
   let old_callout = it.body.children.at(1).body.children.at(1)
   let old_title_block = old_callout.body.children.at(0)
-  let old_title = old_title_block.body.body.children.at(2)
+  let children = old_title_block.body.body.children
+  let old_title = if children.len() == 1 {
+    children.at(0)  // no icon: title at index 0
+  } else {
+    children.at(1)  // with icon: title at index 1
+  }
 
   // TODO use custom separator if available
+  // Use the figure's counter display which handles chapter-based numbering
+  // (when numbering is a function that includes the heading counter)
+  let callout_num = it.counter.display(it.numbering)
   let new_title = if empty(old_title) {
-    [#kind #it.counter.display()]
+    [#kind #callout_num]
   } else {
-    [#kind #it.counter.display(): #old_title]
+    [#kind #callout_num: #old_title]
   }
 
   let new_title_block = block_with_new_content(
-    old_title_block, 
+    old_title_block,
     block_with_new_content(
-      old_title_block.body, 
-      old_title_block.body.body.children.at(0) +
-      old_title_block.body.body.children.at(1) +
-      new_title))
+      old_title_block.body,
+      if children.len() == 1 {
+        new_title  // no icon: just the title
+      } else {
+        children.at(0) + new_title  // with icon: preserve icon block + new title
+      }))
 
-  block_with_new_content(old_callout,
+  align(left, block_with_new_content(old_callout,
     block(below: 0pt, new_title_block) +
-    old_callout.body.children.at(1))
+    old_callout.body.children.at(1)))
 }
 
 // 2023-10-09: #fa-icon("fa-info") is not working, so we'll eval "#fa-info()" instead
@@ -157,9 +194,9 @@
       width: 100%, 
       below: 0pt, 
       block(
-        fill: background_color, 
-        width: 100%, 
-        inset: 8pt)[#text(icon_color, weight: 900)[#icon] #title]) +
+        fill: background_color,
+        width: 100%,
+        inset: 8pt)[#if icon != none [#text(icon_color, weight: 900)[#icon] ]#title]) +
       if(body != []){
         block(
           inset: 1pt, 
@@ -168,6 +205,56 @@
       }
     )
 }
+
+
+// syntax highlighting functions from skylighting:
+/* Function definitions for syntax highlighting generated by skylighting: */
+#let EndLine() = raw("\n")
+#let Skylighting(fill: none, number: false, start: 1, sourcelines) = {
+   let blocks = []
+   let lnum = start - 1
+   let bgcolor = rgb("#f1f3f5")
+   for ln in sourcelines {
+     if number {
+       lnum = lnum + 1
+       blocks = blocks + box(width: if start + sourcelines.len() > 999 { 30pt } else { 24pt }, text(fill: rgb("#aaaaaa"), [ #lnum ]))
+     }
+     blocks = blocks + ln + EndLine()
+   }
+   block(fill: bgcolor, width: 100%, inset: 8pt, radius: 2pt, blocks)
+}
+#let AlertTok(s) = text(fill: rgb("#ad0000"),raw(s))
+#let AnnotationTok(s) = text(fill: rgb("#5e5e5e"),raw(s))
+#let AttributeTok(s) = text(fill: rgb("#657422"),raw(s))
+#let BaseNTok(s) = text(fill: rgb("#ad0000"),raw(s))
+#let BuiltInTok(s) = text(fill: rgb("#003b4f"),raw(s))
+#let CharTok(s) = text(fill: rgb("#20794d"),raw(s))
+#let CommentTok(s) = text(fill: rgb("#5e5e5e"),raw(s))
+#let CommentVarTok(s) = text(style: "italic",fill: rgb("#5e5e5e"),raw(s))
+#let ConstantTok(s) = text(fill: rgb("#8f5902"),raw(s))
+#let ControlFlowTok(s) = text(weight: "bold",fill: rgb("#003b4f"),raw(s))
+#let DataTypeTok(s) = text(fill: rgb("#ad0000"),raw(s))
+#let DecValTok(s) = text(fill: rgb("#ad0000"),raw(s))
+#let DocumentationTok(s) = text(style: "italic",fill: rgb("#5e5e5e"),raw(s))
+#let ErrorTok(s) = text(fill: rgb("#ad0000"),raw(s))
+#let ExtensionTok(s) = text(fill: rgb("#003b4f"),raw(s))
+#let FloatTok(s) = text(fill: rgb("#ad0000"),raw(s))
+#let FunctionTok(s) = text(fill: rgb("#4758ab"),raw(s))
+#let ImportTok(s) = text(fill: rgb("#00769e"),raw(s))
+#let InformationTok(s) = text(fill: rgb("#5e5e5e"),raw(s))
+#let KeywordTok(s) = text(weight: "bold",fill: rgb("#003b4f"),raw(s))
+#let NormalTok(s) = text(fill: rgb("#003b4f"),raw(s))
+#let OperatorTok(s) = text(fill: rgb("#5e5e5e"),raw(s))
+#let OtherTok(s) = text(fill: rgb("#003b4f"),raw(s))
+#let PreprocessorTok(s) = text(fill: rgb("#ad0000"),raw(s))
+#let RegionMarkerTok(s) = text(fill: rgb("#003b4f"),raw(s))
+#let SpecialCharTok(s) = text(fill: rgb("#5e5e5e"),raw(s))
+#let SpecialStringTok(s) = text(fill: rgb("#20794d"),raw(s))
+#let StringTok(s) = text(fill: rgb("#20794d"),raw(s))
+#let VariableTok(s) = text(fill: rgb("#111111"),raw(s))
+#let VerbatimStringTok(s) = text(fill: rgb("#20794d"),raw(s))
+#let WarningTok(s) = text(style: "italic",fill: rgb("#5e5e5e"),raw(s))
+
 
 #let orcid_svg = str(
   "<?xml version=\"1.0\" encoding=\"utf-8\"?>
@@ -349,9 +436,28 @@
   stroke: none
 )
 
-#import "@preview/ctheorems:1.1.3": *
-#show: thmrules
-#let theorem = thmbox("theorem", "Theorem")
+#import "@preview/theorion:0.4.1": make-frame
+
+// Simple theorem render: bold title with period, italic body
+#let simple-theorem-render(prefix: none, title: "", full-title: auto, body) = {
+  if full-title != "" and full-title != auto and full-title != none {
+    strong[#full-title.]
+    h(0.5em)
+  }
+  emph(body)
+  parbreak()
+}
+#let (theorem-counter, theorem-box, theorem, show-theorem) = make-frame(
+  "theorem",
+  text(weight: "bold")[Theorem],
+  inherited-levels: theorem-inherited-levels,
+  numbering: theorem-numbering,
+  render: simple-theorem-render,
+)
+#show: show-theorem
+#let brand-color = (:)
+#let brand-color-background = (:)
+#let brand-logo = (:)
 
 #let fakesc(s, scaling: 0.75) = {
   show regex("\p{Ll}+"): it => {
@@ -366,7 +472,7 @@
   header: context if counter(page).get().first() > 1 {fakesc[
     Article Title
     #h(1fr)
-    February 2, 2026
+    May 30, 2026
     ]},
 )
 
@@ -383,7 +489,7 @@
   header: context if counter(page).get().first() > 1 {fakesc[
     Article Title
     #h(1fr)
-    February 2, 2026
+    May 30, 2026
     ]},
 )
 
@@ -428,8 +534,8 @@
   thanks: [Acknowledgements here.
 
 ],
-  date: [February 2, 2026],
-  abstract: [The text of your abstract. The `ajl-article` format is designed for scholarly articles, especially preprints. Its goal is to be lightweight yet customizable, with thoughtful typography and layout. The template is based off of Cory McCartan's `cmc-article` template, as well as Christopher Kenny's `ctk-article` template.
+  date: [May 30, 2026],
+  abstract: [The text of your abstract. The #NormalTok("ajl-article"); format is designed for scholarly articles, especially preprints. Its goal is to be lightweight yet customizable, with thoughtful typography and layout. The template is based off of Cory McCartan's #NormalTok("cmc-article"); template, as well as Christopher Kenny's #NormalTok("ctk-article"); template.
 
 ],
   abstract-title: "Abstract",
@@ -448,18 +554,18 @@
 
 = Introduction
 <sec-intro>
-Body of paper. Citations are easy to use (Metropolis et al. 1953). See #ref(<sec-addl>, supplement: [Section]) for a math demonstration.
+Body of paper. Citations are easy to use \(Metropolis et al. 1953). See #ref(<sec-addl>, supplement: [Section]) for a math demonstration.
 
 = Additional section headings here
 <sec-addl>
-`cmc-article` includes helpful math packages: `mathtools`, `amssymb`, `amsthm`, and `physics` by default. It also includes a default `header.tex` file with useful macros for math and statistics. Some of these are demonstrated in #ref(<eq-first>, supplement: [Eq.]).
+#NormalTok("cmc-article"); includes helpful math packages: #NormalTok("mathtools");, #NormalTok("amssymb");, #NormalTok("amsthm");, and #NormalTok("physics"); by default. It also includes a default #NormalTok("header.tex"); file with useful macros for math and statistics. Some of these are demonstrated in #ref(<eq-first>, supplement: [Eq.]).
 
-#math.equation(block: true, numbering: "(1)", [ $ upright(bold(X)) & tilde.op cal(N) (bold(mu) \, bold(Sigma)^2) ; quad p (upright(bold(x))) = 1 / sqrt((2 pi)^k det (upright(bold(\*)) Sigma)) exp (- 1 / 2 (upright(bold(x)) - bold(mu))^tack.b bold(Sigma)^(- 1) (upright(bold(x)) - bold(mu)))\
-"𝔼" (Y) & = sum_(y in cal(Y)) y "ℙ" (Y = y) = sum_(y in cal(Y)) y "𝔼" (bb(1) { Y = y }) $ ])<eq-first>
+#math.equation(block: true, numbering: equation-numbering, [ $ upright(bold(X)) & tilde.op cal(N) \( bold(mu) \, bold(Sigma)^2 \) \; quad p \( upright(bold(x)) \) = 1 / sqrt(\( 2 pi \)^k det \( upright(bold(*)) Sigma \)) exp \( - 1 / 2 \( upright(bold(x)) - bold(mu) \)^top bold(Sigma)^(- 1) \( upright(bold(x)) - bold(mu) \) \)\
+"𝔼" \( Y \) & = sum_(y in cal(Y)) y "ℙ" \( Y = y \) = sum_(y in cal(Y)) y "𝔼" \( bb(1) { Y = y } \) $ ])<eq-first>
 
-The package also includes an `assump` environment for typesetting assumptions which can be referenced by easy-to-remember abbreviations.
+The package also includes an #NormalTok("assump"); environment for typesetting assumptions which can be referenced by easy-to-remember abbreviations.
 
-#theorem("Weak Law of Large Numbers")[
+#theorem(title: "Weak Law of Large Numbers")[
 Let $macron(X)_n colon.eq n^(- 1) sum_(i = 1)^n X_i$. Then under and , we have $macron(X)_n arrow.r^(med p thin) mu$ as $n arrow.r oo$.
 
 ] <thm-wlln>
@@ -488,38 +594,16 @@ Testing that #emph[italics] and #strong[bold] text work.
 <level-4-numbered-paragraph-heading>
 Text here.
 
-#block[
-#heading(
-level: 
-5
-, 
-numbering: 
-none
-, 
-[
-Level 5 (paragraph) heading
-]
-)
-]
+===== Level 5 (paragraph) heading
+<level-5-paragraph-heading>
 Text here.
 
 = Conclusion
 <conclusion>
 The final section of the main text.
 
-#block[
-#heading(
-level: 
-1
-, 
-numbering: 
-none
-, 
-[
-References
-]
-)
-]
+#heading(level: 1, numbering: none)[References]
+<references>
 #block[
 #block[
 Metropolis, Nicholas, Arianna W Rosenbluth, Marshall N Rosenbluth, Augusta H Teller, and Edward Teller. 1953. “Equation of State Calculations by Fast Computing Machines.” #emph[The Journal of Chemical Physics] 21 (6): 1087--92.
