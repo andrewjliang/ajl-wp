@@ -10,7 +10,13 @@
 \DeclareMathOperator{\E}{\mathbb{E}}
 \DeclareMathOperator{\Pr}{\mathbb{P}}
 \providecommand{\cvp}{\xrightarrow{\:p\,}}
+\providecommand{\V}{\mathbb{V}}
+\providecommand{\bX}{\mathbf{X}}
+\providecommand{\bx}{\mathbf{x}}
+\providecommand{\oZ}{\overline{Z}}
+\providecommand{\oY}{\overline{Y}}
 \providecommand{\Norm}{\mathcal{N}\qty}
+\providecommand{\Var}{\text{Var}}
 \usepackage{amsmath}
 \usepackage{bm}
 \providecommand{\indep}{\!\perp\!\!\!\perp}
